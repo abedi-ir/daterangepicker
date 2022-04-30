@@ -254,18 +254,86 @@
 
         $('#startDate').daterangepicker({
           singleDatePicker: true,
-          startDate: moment().subtract(6, 'days')
+          startDate: moment().subtract(6, 'days'),
+          moment: moment,
+          locale: {
+            direction: 'rtl',
+            separator: ' - ',
+            applyLabel: 'اعمال',
+            cancelLabel: 'انصراف',
+            fromLabel: 'از',
+            toLabel: 'به',
+            customRangeLabel: 'دلخواه',
+            monthNames: moment.localeData()._jMonthsShort,
+            firstDay: 7
+          },
         });
 
         $('#endDate').daterangepicker({
           singleDatePicker: true,
-          startDate: moment()
+          moment: moment,
+          startDate: moment(),
+          locale: {
+            direction: 'rtl',
+            separator: ' - ',
+            applyLabel: 'اعمال',
+            cancelLabel: 'انصراف',
+            fromLabel: 'از',
+            toLabel: 'به',
+            customRangeLabel: 'دلخواه',
+            monthNames: moment.localeData()._jMonthsShort,
+            firstDay: 7
+          },
+        });
+
+        $('#minDate').daterangepicker({
+          singleDatePicker: true,
+          autoUpdateInput: false,
+          showDropdowns: true,
+          moment: moment,
+          locale: {
+            direction: 'rtl',
+            separator: ' - ',
+            applyLabel: 'اعمال',
+            cancelLabel: 'انصراف',
+            fromLabel: 'از',
+            toLabel: 'به',
+            customRangeLabel: 'دلخواه',
+            monthNames: moment.localeData()._jMonthsShort,
+            firstDay: 7
+          },
+        }, function(start) {
+          $(this.element).val(start.format("YYYY/MM/DD"));
+        });
+
+        $('#maxDate').daterangepicker({
+          singleDatePicker: true,
+          autoUpdateInput: false,
+          showDropdowns: true,
+          moment: moment,
+          locale: {
+            direction: 'rtl',
+            separator: ' - ',
+            applyLabel: 'اعمال',
+            cancelLabel: 'انصراف',
+            fromLabel: 'از',
+            toLabel: 'به',
+            customRangeLabel: 'دلخواه',
+            monthNames: moment.localeData()._jMonthsShort,
+            firstDay: 7
+          },
+        }, function(start) {
+          $(this.element).val(start.format("YYYY/MM/DD"));
         });
 
         updateConfig();
 
         function updateConfig() {
-          var options = {};
+          var options = {
+            moment: moment,
+            linkedCalendars: $('#linkedCalendars').is(':checked'),
+          };
+          console.log('moment.localeData()._jMonthsShort', moment.localeData()._jMonthsShort);
 
           if ($('#singleDatePicker').is(':checked'))
             options.singleDatePicker = true;
@@ -308,24 +376,17 @@
             };
           }
 
-          if (true || $('#locale').is(':checked')) {
-            $('#rtl-wrap').show();
-            options.locale = {
-              direction: 'rtl',
-              separator: ' - ',
-              applyLabel: 'اعمال',
-              cancelLabel: 'انصراف',
-              fromLabel: 'از',
-              toLabel: 'به',
-              customRangeLabel: 'دلخواه',
-              monthNames: moment.localeData()._jMonthsShort,
-              firstDay: 7
-            };
-          } else {
-            $('#rtl-wrap').hide();
-          }
-
-            options.linkedCalendars = false;
+          options.locale = {
+            direction: 'rtl',
+            separator: ' - ',
+            applyLabel: 'اعمال',
+            cancelLabel: 'انصراف',
+            fromLabel: 'از',
+            toLabel: 'به',
+            customRangeLabel: 'دلخواه',
+            monthNames: moment.localeData()._jMonthsShort,
+            firstDay: 7
+          };
 
           if (!$('#autoUpdateInput').is(':checked'))
             options.autoUpdateInput = false;
@@ -340,10 +401,10 @@
             options.parentEl = $('#parentEl').val();
 
           if ($('#startDate').val().length) 
-            //options.startDate = $('#startDate').val();
+            options.startDate = $('#startDate').val();
 
           if ($('#endDate').val().length)
-            //options.endDate = $('#endDate').val();
+            options.endDate = $('#endDate').val();
           
           if ($('#minDate').val().length)
             options.minDate = $('#minDate').val();
