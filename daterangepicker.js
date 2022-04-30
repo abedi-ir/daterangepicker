@@ -81,12 +81,12 @@
             monthNames: this.moment.monthsShort(),
             firstDay: this.moment.localeData().firstDayOfWeek()
         };
-        console.log(this.locale);
 
         this.callback = function() { };
 
         //some state information
         this.isShowing = false;
+        this.isClicked = false;
         this.leftCalendar = {};
         this.rightCalendar = {};
 
@@ -385,9 +385,11 @@
 
         if (this.singleDatePicker) {
             this.container.addClass('single');
-            this.container.find('.drp-calendar.left').addClass('single');
-            this.container.find('.drp-calendar.left').show();
-            this.container.find('.drp-calendar.right').hide();
+            const side = (this.locale.direction == 'ltr' ? 'left' : 'right');
+            const otherSide = (side == 'left' ? 'right' : 'left');
+            this.container.find('.drp-calendar.' + side).addClass('single');
+            this.container.find('.drp-calendar.' + side).show();
+            this.container.find('.drp-calendar.' + otherSide).hide();
             if (!this.timePicker) {
                 this.container.addClass('auto-apply');
             }
@@ -648,12 +650,8 @@
             }
 
             //populate the calendar with date objects
-            var startDay = daysInLastMonth - dayOfWeek + this.locale.firstDay + 1;
-            if (startDay > daysInLastMonth)
-                startDay -= 7;
+            var startDay = daysInLastMonth - dayOfWeek + 1;
 
-            if (dayOfWeek == this.locale.firstDay)
-                startDay = daysInLastMonth - 6;
             var curDate = lastYear.clone().month(lastMonth.month()).date(startDay).hour(12).minute(minute).second(second);
 
             var col, row;
@@ -697,7 +695,7 @@
             if (this.showWeekNumbers || this.showISOWeekNumbers)
                 html += '<th></th>';
             
-            if ((!minDate || minDate.isBefore((this.locale.direction === 'ltr' ? calendar : (side == 'left' ? this.rightCalendar : this.leftCalendar)).firstDay )) && (!this.linkedCalendars || side == (this.locale.direction === 'ltr' ? 'left' : 'right'))) {
+            if ((!minDate || minDate.isBefore((this.locale.direction === 'ltr' ? calendar : (side == 'left' ? this.leftCalendar : this.rightCalendar)).firstDay )) && (!this.linkedCalendars || side == (this.locale.direction === 'ltr' ? 'left' : 'right'))) {
                 html += '<th class="prev available"><span></span></th>';
             } else {
                 html += '<th></th>';
@@ -990,7 +988,7 @@
 
                 var am_html = '';
                 var pm_html = '';
-                console.log(this.moment.localeData());
+
                 if (minDate && selected.clone().hour(12).minute(0).second(0).isBefore(minDate))
                     am_html = ' disabled="disabled" class="disabled"';
 
@@ -1142,7 +1140,7 @@
             }
 
             //if a new date range was selected, invoke the user callback function
-            if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
+            if (this.isClicked || !this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
                 this.callback(this.startDate.clone(), this.endDate.clone(), this.chosenLabel);
 
             //if picker is attached to a text input, update it
@@ -1153,6 +1151,7 @@
             this.container.hide();
             this.element.trigger('hide.daterangepicker', this);
             this.isShowing = false;
+            this.isClicked = false;
         },
 
         toggle: function(e) {
@@ -1344,6 +1343,7 @@
 
             if (this.singleDatePicker) {
                 this.setEndDate(this.startDate);
+                this.isClicked = true;
                 if (!this.timePicker)
                     this.clickApply();
             }
@@ -1404,9 +1404,12 @@
                 leftOrRight = isLeft ? 'left' : 'right',
                 cal = this.container.find('.drp-calendar.'+leftOrRight);
 
-            // Month must be Number for new moment versions
+            if (this.singleDatePicker && !isLeft && this.locale.direction != 'ltr') {
+                isLeft = true;
+            }
+            // Must be Number for new moment versions
             var month = parseInt(cal.find('.monthselect').val(), 10);
-            var year = cal.find('.yearselect').val();
+            var year = parseInt(cal.find('.yearselect').val());
 
             if (!isLeft) {
                 if (year < this.startDate.year() || (year == this.startDate.year() && month < this.startDate.month())) {
@@ -1429,7 +1432,7 @@
                 }
             }
 
-            if (isLeft) {
+            if ($(e.target).closest('.drp-calendar').hasClass('left')) {
                 this.leftCalendar.month.month(month).year(year);
                 if (this.linkedCalendars)
                     this.rightCalendar.month = this.leftCalendar.month.clone().add(1, 'month');
